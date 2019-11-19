@@ -2,6 +2,10 @@ const express = require('express');
 const helmet = require('helmet');
 const cors = require('cors');
 
+
+const studentsRouter = require('./api/students/students-router.js');
+const authRouter = require('./api/auth/auth-router');
+
 const server = express();
 
 
@@ -9,8 +13,7 @@ server.use(helmet());
 server.use(express.json());
 server.use(cors());
 
-server.get('/', (req, res) => {
-  res.json({ api: 'Yaay! our api is working' });
-});
+server.use('/api/auth', authRouter);
+server.use('/api/students', studentsRouter);
 
 module.exports = server;
