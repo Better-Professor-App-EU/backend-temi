@@ -1,11 +1,29 @@
 const Users = require("../students/students-model");
+const jwt = require("jsonwebtoken");
 
 module.exports = {
   validateStudent,
   validateStudentId,
   validateNewUser,
-  validateMessage
+  validateMessage,
+  restricted
 };
+
+function restricted(req, res, next) {
+  const token = req.headers.authorization;
+  if (token) {
+    jwt.verify(token, process.env.JWT_SECRET, (err, decodedToken) => {
+      if (err) {
+        res.status(401).json({ message: err.message });
+      } else {
+        req.decodedToken = decodedToken;
+        next();
+      }
+    });
+  } else {
+    res.status(400).json({ message: "No credentials provided" });
+  }
+}
 
 function validateNewUser(req, res, next) {
   let user = req.body;
@@ -76,13 +94,7 @@ function validateMessage(req, res, next) {
         message: "missing required timestamp field for a new user record"
       });
   } 
-  else if (!newMessage.user_id) {
-    res
-      .status(400)
-      .json({
-        message: "missing required user_id field for a new user record"
-      });
-  } else {
+   else {
     req.newMessage = newMessage;
     next();
   }
